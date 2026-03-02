@@ -17,7 +17,7 @@ La forma más sencilla de levantar todo el ecosistema es utilizando `docker-comp
 
 1. Clona este repositorio y navega a la raíz del proyecto:
    ```bash
-   git clone <URL_DE_TU_REPOSITORIO>
+   git clone https://github.com/Ismaelmtzuru/javaMicroServices.git
    cd ArquitecturaMicroserviciosEscuela
    ```
 

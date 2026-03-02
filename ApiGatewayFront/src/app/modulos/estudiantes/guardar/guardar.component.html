@@ -1,0 +1,19 @@
+<form>
+  <div class="mb-3">
+    <h3>Agregar Datos de Estudiante</h3>
+    <label for="exampleInputEmail1" class="form-label">ID Estudiante</label>
+    <input type="number" class="form-control" name="idEstudiante" [(ngModel)]="estudiante.idEstudiante" aria-describedby="emailHelp">
+    <label for="exampleInputEmail1" class="form-label">Nombre</label>
+    <input type="text" class="form-control" name="nombre" [(ngModel)]="estudiante.nombre" aria-describedby="emailHelp">
+    <label for="exampleInputEmail1" class="form-label">Apellido Paterno</label>
+    <input type="text" class="form-control" name="app" [(ngModel)]="estudiante.app" aria-describedby="emailHelp">
+    <label for="exampleInputEmail1" class="form-label">Apellido Materno</label>
+    <input type="text" class="form-control" name="apm" [(ngModel)]="estudiante.apm" aria-describedby="emailHelp">
+    <label for="exampleInputEmail1" class="form-label">ID Escuela</label>
+    <input type="number" class="form-control" name="idEscuela" [(ngModel)]="estudiante.idEscuela" aria-describedby="emailHelp">
+  </div>
+  <button  (click)="guardarEstudiante()" class="btn btn-primary">Agregar</button>
+  <button class="btn btn-secondary" (click)="regresar()" type="button" id="button-regresar">
+      Regresar
+    </button>
+</form>

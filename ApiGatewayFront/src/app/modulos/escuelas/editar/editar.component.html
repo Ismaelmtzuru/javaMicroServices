@@ -1,0 +1,13 @@
+<form>
+  <div class="mb-3">
+    <label for="exampleInputEmail1" class="form-label">ID de escuela</label>
+    <input type="number" disabled class="form-control" name="idEscuela" aria-describedby="emailHelp" [(ngModel)]="escuelaEncontrada.idEscuela">
+    <label for="exampleInputEmail1" class="form-label">Clave</label>
+    <input type="text"  class="form-control" name="clave" aria-describedby="emailHelp" [(ngModel)]="escuelaEncontrada.clave">
+    <label for="exampleInputEmail1" class="form-label">Nombre</label>
+    <input type="text"  class="form-control" name="nombre" aria-describedby="emailHelp" [(ngModel)]="escuelaEncontrada.nombre">
+    <label for="exampleInputEmail1" class="form-label">Fecha de apertura</label>
+    <input type="date"  class="form-control" name="fechaApertura" aria-describedby="emailHelp" [(ngModel)]="escuelaEncontrada.fechaApertura">
+  </div>
+  <button type="submit" class="btn btn-primary" (click)="editarEscuela(escuelaEncontrada)">Editar</button>
+</form> 

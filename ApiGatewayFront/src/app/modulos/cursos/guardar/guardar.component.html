@@ -1,0 +1,16 @@
+<form>
+  <div class="mb-3">
+    <h3>Ingresa datos del curso</h3>
+
+    <label for="exampleInputEmail1" class="form-label">Nombre</label>
+    <input type="text" class="form-control" name="nombre" [(ngModel)]="cursosGuardar.nombre" aria-describedby="emailHelp">
+    <label for="exampleInputEmail1" class="form-label">ID Escuela</label>
+    <input type="text" class="form-control" name="idEscuela" [(ngModel)]="cursosGuardar.idEscuela" aria-describedby="emailHelp">
+        <label for="exampleInputEmail1" class="form-label">Fecha de Inicio</label>
+    <input type="date" class="form-control" name="fechaInicio" [(ngModel)]="cursosGuardar.fechaInicio" aria-describedby="emailHelp">
+  </div>
+</form>
+  <button type="button" (click)="guardarCursos()" class="btn btn-primary">Agregar</button>
+  <button type="button" (click)="regresar()" class="btn btn-secondary" id="button-regresar">
+      Regresar
+    </button>

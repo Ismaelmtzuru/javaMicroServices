@@ -1,0 +1,17 @@
+<form>
+  <div class="mb-3">
+    <h3>Agregar Datos de Escuela</h3>
+    <label for="exampleInputEmail1" class="form-label">ID Escuela</label>
+    <input type="number" class="form-control" name="idEscuela" [(ngModel)]="escuela.idEscuela" aria-describedby="emailHelp">
+    <label for="exampleInputEmail1" class="form-label">Nombre</label>
+    <input type="text" class="form-control" name="nombre" [(ngModel)]="escuela.nombre" aria-describedby="emailHelp">
+    <label for="exampleInputEmail1" class="form-label">Clave</label>
+    <input type="text" class="form-control" name="clave" [(ngModel)]="escuela.clave" aria-describedby="emailHelp">
+    <label for="exampleInputEmail1" class="form-label">Fecha de Apertura</label>
+    <input type="date" class="form-control" name="fechaApertura" [(ngModel)]="escuela.fechaApertura" aria-describedby="emailHelp">
+  </div>
+  <button  (click)="guardarEscuela()" class="btn btn-primary">Agregar</button>
+  <button class="btn btn-secondary" (click)="regresar()" type="button" id="button-regresar">
+      Regresar
+    </button>
+</form>

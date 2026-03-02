@@ -1,0 +1,35 @@
+<div class="container d-flex justify-content-between" > 
+    <button type="button" (click)="abrirBuscarEscuelaClaveComponente()" class="btn btn-outline-dark">Buscar Escuela por clave</button>
+    <button class="btn btn-outline-dark" (click)="abrirAgregarEscuelaComponente()" type="button">
+      Agregar Escuela
+    </button>
+</div>
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">ID Escuela</th>
+      <th scope="col">Nombre</th>
+      <th scope="col">Clave</th>
+      <th scope="col">Fecha de Apertura</th>
+
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let e of escuelas">
+      <th scope="row">{{e.idEscuela}}</th>
+      <td>{{e.nombre}}</td>
+      <td>{{e.clave}}</td>
+      <td>{{e.fechaApertura}}</td>
+      <td>
+        <button class="btn btn-outline-dark" (click)="abrirEditarEscuelaComponente(e)">
+          Editar
+        </button>
+      </td>
+      <td>
+        <button class="btn btn-outline-dark" (click)="eliminarEscuela(e)" >
+          Eliminar
+        </button>
+      </td>
+    </tr>
+  </tbody>
+</table>

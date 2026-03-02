@@ -1,0 +1,45 @@
+<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+<!-- * * * * * * * * * * * The content below * * * * * * * * * * * -->
+<!-- * * * * * * * * * * is only a placeholder * * * * * * * * * * -->
+<!-- * * * * * * * * * * and can be replaced. * * * * * * * * * * * -->
+<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+<!-- * * * * * * * * * Delete the template below * * * * * * * * * * -->
+<!-- * * * * * * * to get started with your project! * * * * * * * * -->
+<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+<div class="d-flex" id="wrapper">
+  <div class="bg-dark border-right text-white" id="sidebar-wrapper" style="width: 250px; min-height: 100vh;">
+    <div style=cursor:pointer  class="sidebar-heading p-4" (click)="abrirPaginaInicio()"><b>Schools</b> Admin</div>
+    <div class="list-group list-group-flush">
+      <a style=cursor:pointer (click)="abrirListarComponenteEscuelas()" class="list-group-item list-group-item-action bg-dark text-white">🏫 Escuelas</a>
+      <a  style=cursor:pointer (click)="abrirListarEstudiantes()" class="list-group-item list-group-item-action bg-dark text-white">👨‍🎓 Estudiantes</a>
+      <a  style=cursor:pointer (click)="abrirListarCursos()" class="list-group-item list-group-item-action bg-dark text-white">📚 Cursos</a>
+    </div>
+  </div>
+
+  <div id="page-content-wrapper" class="w-100">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom p-3">
+      <span class="navbar-brand">Gestor Centralizado de Microservicios</span>
+    </nav>
+    <div class="container-fluid p-4">
+      <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvas" aria-labelledby="offcanvasLabel">
+        <div class="offcanvas-header">
+          <h5 class="offcanvas-title" id="offcanvasLabel">Bienvenido</h5>
+          <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+          Aquí podrás administrar tus microservicios de manera centralizada.
+        </div>
+      </div>
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>
+
+<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+<!-- * * * * * * * * * * * The content above * * * * * * * * * * * -->
+<!-- * * * * * * * * * * is only a placeholder * * * * * * * * * * -->
+<!-- * * * * * * * * * * and can be replaced. * * * * * * * * * * * -->
+<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+<!-- * * * * * * * * * * End of Placeholder * * * * * * * * * * * -->
+<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+

@@ -1,0 +1,15 @@
+<form>
+  <div class="mb-3">
+    <label for="exampleInputEmail1"  class="form-label">ID de estudiante</label>
+    <input type="number" disabled [(ngModel)]="estudianteEncontrado.idEstudiante" class="form-control" name="idEstudiante" aria-describedby="emailHelp">
+    <label for="exampleInputEmail1" class="form-label">Nombre</label>
+    <input type="text"  class="form-control" [(ngModel)]="estudianteEncontrado.nombre" name="nombre" aria-describedby="emailHelp">
+    <label for="exampleInputEmail1" class="form-label">Apellido Paterno</label>
+    <input type="text"  class="form-control" [(ngModel)]="estudianteEncontrado.app" name="apellidoPaterno" aria-describedby="emailHelp">
+    <label for="exampleInputEmail1"  class="form-label">Apellido Materno</label>
+    <input type="text"  class="form-control" [(ngModel)]="estudianteEncontrado.apm" name="apellidoMaterno" aria-describedby="emailHelp">
+    <label for="exampleInputEmail1" class="form-label">Id de escuela a asignar</label>
+    <input type="number"  class="form-control" [(ngModel)]="estudianteEncontrado.idEscuela" name="idEscuela" aria-describedby="emailHelp">
+  </div>
+  <button type="submit" (click)="editarEstudiante()" class="btn btn-primary">Editar</button>
+</form>

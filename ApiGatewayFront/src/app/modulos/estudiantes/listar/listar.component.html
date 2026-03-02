@@ -1,0 +1,34 @@
+
+<button class="btn btn-outline-dark" (click)="abrirAgregarEstudiante()" type="button">
+      Agregar Estudiante
+    </button>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">ID Estudiante</th>
+      <th scope="col">Nombre</th>
+      <th scope="col">Apellido Paterno</th>
+      <th scope="col">Apellido Materno</th>
+      <th scope="col">ID Escuela</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let e of estudiantes">
+      <th scope="row">{{e.idEstudiante}}</th>
+      <td>{{e.nombre}}</td>
+      <td>{{e.app}}</td>
+      <td>{{e.apm}}</td>
+      <td>{{e.idEscuela}}</td>
+      <td>
+        <button class="btn btn-outline-dark" (click)="abrirEditarEstudiante(e)" type="button">
+          Editar
+        </button>
+      </td>
+       <td>
+        <button class="btn btn-outline-dark" (click)="eliminarEstudiante(e)" type="button">
+          Eliminar
+        </button>
+    </tr>
+  </tbody>
+</table>

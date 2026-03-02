@@ -1,0 +1,80 @@
+package com.mx.MsCourses.service;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.mx.MsCourses.model.Cursos;
+import com.mx.MsCourses.repository.CursosRepository;
+
+@Service
+public class CursoService {
+
+	@Autowired
+	CursosRepository cursosRepository;
+	
+	@Transactional
+	public List<Cursos> mostrar(){
+		return cursosRepository.findAll();
+	}
+	
+	public Cursos guardar(Cursos curso) {
+	    // Paso A: Imprime para asegurar que los datos no lleguen nulos
+	    System.out.println("Datos recibidos: " + curso.getNombre() + " | " + curso.getFechaInicio());
+
+	 
+	    boolean existe = cursosRepository.existsByNombreAndIdEscuelaAndFechaInicio(
+	        curso.getNombre(), curso.getIdEscuela(), curso.getFechaInicio()
+	    );
+	    if (existe) return null;
+	  
+	    try {
+	        return cursosRepository.save(curso);
+	    } catch (Exception e) {
+	        System.out.println("Error en el SAVE: " + e.getMessage());
+	        return null;
+	    }
+	}
+	
+	@Transactional(readOnly=true)
+	public List<Cursos> buscarIdEscuela(Integer idEscuela){
+		return cursosRepository.findByIdEscuela(idEscuela);
+	}
+	
+	
+	@Transactional
+	public List<Cursos> listar(){
+		return cursosRepository.findAll();
+	}
+	
+	
+	@Transactional
+	public String eliminar(Cursos curso) {
+	
+	    Optional<Cursos> cursoEncontrado = cursosRepository.findById(curso.getIdCurso());
+
+	    if (cursoEncontrado.isPresent()) {
+	
+	        cursosRepository.delete(cursoEncontrado.get());
+	        
+
+	        return "eliminado"; 
+	    }
+	    
+
+	    return "inexistente";
+	}
+	
+	@Transactional
+	public String editar(Cursos curso) {
+		if(cursosRepository.existsById(curso.getIdCurso())) {
+			cursosRepository.save(curso);
+			return "editado";
+		}else {
+			return "inexistente";
+		}
+	}
+}

@@ -1,0 +1,223 @@
+package com.mx.MsEscuelas.service;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
+import feign.FeignException;
+import com.mx.MsEscuelas.dto.CursosDTO;
+import com.mx.MsEscuelas.dto.EstudiantesDTO;
+import com.mx.MsEscuelas.model.Escuelas;
+import com.mx.MsEscuelas.openFeing.FeingClientMsCourses;
+import com.mx.MsEscuelas.openFeing.FeingClienteMsEstudiantes;
+import com.mx.MsEscuelas.repository.EscuelasRepository;
+@SuppressWarnings("unchecked")
+@Service
+public class EscuelasService {
+	@Autowired
+	EscuelasRepository escuelasRepository;
+	
+	
+	@Transactional(readOnly=true)
+	public List<Escuelas> mostrar(){
+		return(List<Escuelas>) escuelasRepository.findAll();
+	}
+	
+	@Transactional
+	public String guardar(Escuelas escuela) {
+		Escuelas escuelaEncontrada = escuelasRepository.findById(escuela.getIdEscuela()).orElse(null);
+		Escuelas claveEncontrada = escuelasRepository.findByClave(escuela.getClave());
+		if (escuelaEncontrada!=null) {
+			return "id";
+		}
+		if(claveEncontrada!=null) {
+			return "clave";
+		}
+		
+		escuelasRepository.save(escuela);
+		return "guardado";
+	}
+	
+	
+	@Transactional(readOnly=true)
+	public Escuelas buscarClaveEscuela(String clave) {
+		for(Escuelas e:mostrar()) {
+			if(e.getClave().equals(clave)) {
+				return e;
+			}
+		}
+		return null;
+	}
+	
+	@Transactional(readOnly=true)
+	public Escuelas buscarEscuelaId(Escuelas escuela) {
+		return escuelasRepository.findById(escuela.getIdEscuela()).orElse(null);
+	}
+	
+	@Transactional
+	public String eliminarEscuela(Escuelas escuela) {
+		if(escuelasRepository.existsById(escuela.getIdEscuela())) {
+			escuelasRepository.deleteById(escuela.getIdEscuela());
+			return "eliminado";
+		}
+		return "inexistente";
+	}
+	
+	@Transactional 
+	public String editarEscuela(Escuelas escuela) {
+		Escuelas existente = escuelasRepository.findById(escuela.getIdEscuela()).orElse(null);
+		if(existente != null) {
+			Escuelas claveEncontrada = escuelasRepository.findByClave(escuela.getClave());
+			if(claveEncontrada !=null && !claveEncontrada.getIdEscuela().equals(escuela.getIdEscuela())) {
+				return "clave registrada";
+			}
+			
+			escuelasRepository.save(escuela);
+			return "editado";
+		}
+		return "inexistente";
+	}
+	
+	
+	/* Comunicación de los microservicios
+	 * 1 -- Rest template
+	 * 2 -- OpenFeignCliente -- cliente fingido*/
+	
+	@Autowired
+	RestTemplate restTemplate;
+	
+	public List<CursosDTO> buscarCursosIdEscuela(Integer idEscuela){
+		List<CursosDTO> registrosMs = restTemplate.getForObject("http://localhost:8762/cursos/cursos/"+ idEscuela, List.class);
+		return registrosMs;
+	}
+	
+	
+	@Autowired
+	FeingClientMsCourses feingClientMsCourses;
+	
+	public CursosDTO guardarCurso(CursosDTO curso) {
+		try {
+			boolean existeEscuela = escuelasRepository.existsById(curso.getIdEscuela());
+			if(!existeEscuela) {
+				System.out.println("Bloqueado, ID escuela no existente");
+				throw new RuntimeException("Escuela no encontrada");
+			}
+			return feingClientMsCourses.guardar(curso);
+		}catch(FeignException.Conflict e) {
+			System.out.println("Curso registrado ya anteriormente");
+			return curso;
+		}catch(Exception e) {
+			System.err.println("Error al guardar:" + e.getMessage());
+			return null;
+		}
+	}
+	
+	public CursosDTO buscarCurso(CursosDTO curso) {
+		System.out.println(curso.getIdCurso());
+		return feingClientMsCourses.buscarCurso(curso);
+	}
+	
+	public List<CursosDTO> listarCursos(){
+		
+		try {
+			return feingClientMsCourses.listar();
+		} catch (Exception e) {
+			System.out.println("Error: " + e.getMessage());
+			return new ArrayList<>();
+		}
+	}
+	
+	public List<CursosDTO> buscarIdEscuela(Integer idEscuela){
+		return feingClientMsCourses.buscarIdEscuela(idEscuela);
+	}
+	
+	public String eliminarCurso(CursosDTO curso) {
+		return feingClientMsCourses.eliminarCurso(curso);
+	}
+	
+	public String editarCurso(CursosDTO curso) {
+		if(!escuelasRepository.existsById(curso.getIdEscuela())) {
+			return "escuela no existe";
+		}
+		try {
+			feingClientMsCourses.editarCurso(curso);
+			return "Editado";
+		}catch (feign.FeignException.NotFound e){
+			return "curso no existe";
+		}catch (feign.FeignException e) {
+			return "Error microservicio";
+		}catch (Exception e) {
+			return "Erros comunicacion";
+		}
+	}
+	
+	
+	
+	@Autowired
+	FeingClienteMsEstudiantes feingClientMsEstudiantes;
+	
+	
+	public List<EstudiantesDTO> listarEstudiantes(){
+		return feingClientMsEstudiantes.listar();
+	}
+	
+	public String agregarEstudiante(EstudiantesDTO estudiante) {
+	    if(!escuelasRepository.existsById(estudiante.getIdEscuela())) {
+	        return "Escuela inexistente";
+	    }
+	    
+	    try {
+	        feingClientMsEstudiantes.guardarEstudiante(estudiante);
+	        return "agregado";
+	    } catch(feign.FeignException e) {
+	        // Si el MS Estudiantes mandó 400 (ID ocupado)
+	        if(e.status() == 400) return "id";
+	        
+	        // Si el MS Estudiantes mandó 406 (Nombre ocupado)
+	        if(e.status() == 406) return "nombre";
+	        
+	        return "Error técnico: " + e.status();
+	    }
+	}
+	
+	
+	
+	public String eliminarEstudiante(EstudiantesDTO estudiante) {
+		try {
+			feingClientMsEstudiantes.eliminarEstudiante(estudiante);
+			return "eliminado";
+		} catch (feign.FeignException.NotFound e) {
+			return "inexistente";
+		}catch(Exception e) {
+			return "Error en sistema";
+		}
+	}
+	
+	public String editarEstudiante(EstudiantesDTO estudiante) {
+		boolean escuelaExiste = escuelasRepository.existsById(estudiante.getIdEscuela());
+		if(!escuelaExiste) {
+			return "Escuela no existe";
+		}
+		try {
+			return feingClientMsEstudiantes.editarEstudiante(estudiante);
+		} catch (feign.FeignException e) {
+	        // Si el micro de Estudiantes responde con un error (404, 409, etc)
+	        // e.contentUTF8() contendrá: "No existe para editar" o "Nombre de estudiante ya registrado"
+	        String mensajeError = e.contentUTF8();
+	        
+	        if(e.status() == 404) return "Estudiante no existe";
+	        if(mensajeError.contains("Nombre de estudiante")) return "nombre duplicado";
+	        
+	        return mensajeError;
+	    }
+		
+	}
+	
+	public EstudiantesDTO buscarEstudiante(EstudiantesDTO estudiante) {
+		return feingClientMsEstudiantes.buscarEstudiante(estudiante);
+	}
+	
+	
+}

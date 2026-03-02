@@ -1,0 +1,15 @@
+package com.mx.MsCourses.repository;
+
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.mx.MsCourses.model.Cursos;
+
+public interface CursosRepository extends JpaRepository<Cursos,Integer>{
+
+	public List<Cursos> findByIdEscuela(Integer idEscuela);
+
+	public List<Cursos> existsByNombreAndIdEscuelaAndFechaInicio(Cursos curso);
+}

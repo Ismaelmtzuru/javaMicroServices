@@ -1,0 +1,227 @@
+package com.mx.MsEscuelas.controller;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.mx.MsEscuelas.dto.CursosDTO;
+import com.mx.MsEscuelas.dto.EstudiantesDTO;
+import com.mx.MsEscuelas.model.Escuelas;
+import com.mx.MsEscuelas.service.EscuelasService;
+
+@RestController
+@RequestMapping(path="escuelas")
+public class EscuelasController {
+
+	@Autowired
+	EscuelasService escuelasService;
+	
+	
+	@GetMapping()
+	public List<Escuelas> mostrar(){
+		return escuelasService.mostrar();
+	}
+	
+	@PostMapping(path="buscarEscuelaId")
+	public ResponseEntity<?> buscarEscuela(@RequestBody Escuelas escuela){
+		Escuelas response = escuelasService.buscarEscuelaId(escuela);
+		if(response != null) {
+			return new ResponseEntity<Escuelas>(response,HttpStatus.CREATED);
+		}else
+			return new ResponseEntity<String>("No existe escuela con ID",HttpStatus.NOT_FOUND);
+	}
+	
+	@PostMapping()
+	public ResponseEntity<?> guardar(@RequestBody Escuelas escuela) {
+		String escuelaGuardada = escuelasService.guardar(escuela);
+		if(escuelaGuardada.equals("guardado")) {
+			return new ResponseEntity<Escuelas>(escuela,HttpStatus.CREATED);
+		}else if (escuelaGuardada.equals("id"))
+			{return new ResponseEntity<String>("Ya existe ID",HttpStatus.CONFLICT);
+		}else if(escuelaGuardada.equals("clave")) {
+			return new ResponseEntity<String>("Clave usada",HttpStatus.BAD_REQUEST);
+		}else
+			return new ResponseEntity<String>("Error interno",HttpStatus.INTERNAL_SERVER_ERROR);
+		
+	}
+	
+	@GetMapping(path="{clave}")
+	public Escuelas buscarClave(@PathVariable("clave") String clave) {
+		return escuelasService.buscarClaveEscuela(clave);
+	}
+	
+	
+	
+	@PutMapping(path="editarEscuela")
+	public ResponseEntity<?> editarEscuela(@RequestBody Escuelas escuela){
+		String response = escuelasService.editarEscuela(escuela);
+		if (response.equals("inexistente")) {
+			return new ResponseEntity<String>("No existe registro para editar",HttpStatus.CONFLICT);
+		}else if(response.equals("clave registrada")) {
+			return new ResponseEntity<String>("Clave ya existe",HttpStatus.BAD_REQUEST);
+		}
+		return new ResponseEntity<Escuelas>(escuela,HttpStatus.CREATED);
+	}
+	
+	@PostMapping(path="eliminarEscuela")
+	public ResponseEntity<String> eliminarEscuela(@RequestBody Escuelas escuela){
+		String response = escuelasService.eliminarEscuela(escuela);
+		if(response.equals("eliminado")) {
+			return new ResponseEntity<String>("Registro eliminado",HttpStatus.CREATED);
+		}
+		return new ResponseEntity<String>("No existe registro",HttpStatus.CONFLICT);
+	}
+	
+	
+	//Peticiones de MS-Courses
+	@GetMapping(path="buscarCursos/{idEscuela}")
+	public List<CursosDTO> buscarCursoIdEscuela(@PathVariable("idEscuela") Integer idEscuela){
+		return escuelasService.buscarCursosIdEscuela(idEscuela);
+	}
+	
+	@PostMapping(path="guardarCurso")
+	public ResponseEntity<?> guardarCurso(@RequestBody CursosDTO curso) {
+		CursosDTO response =  escuelasService.guardarCurso(curso);
+		if (response != null) {
+			
+			return new ResponseEntity<CursosDTO>(curso,HttpStatus.CREATED);
+		}else
+			return new ResponseEntity<String>("ID escuela no está registrado",HttpStatus.NOT_FOUND);
+		
+	}
+	
+	@GetMapping(path="listarCursos")
+	public ResponseEntity<?> listarCursos(){
+		List<CursosDTO> cursos = escuelasService.listarCursos();
+		return new ResponseEntity<>(cursos,HttpStatus.CREATED);
+		
+	}
+	
+	@PostMapping(path="buscarCurso")
+	public ResponseEntity<?> buscarCurso(@RequestBody CursosDTO curso){
+		CursosDTO response = escuelasService.buscarCurso(curso);
+		if(response!=null) {
+			return new ResponseEntity<CursosDTO>(response,HttpStatus.OK);
+		}else
+			return new ResponseEntity<String>("No existe curso",HttpStatus.NOT_FOUND);
+	}
+	
+	@PostMapping(path="eliminarCurso")
+	public ResponseEntity<String> eliminarCurso(@RequestBody CursosDTO curso) {
+	    try {
+	        String res = escuelasService.eliminarCurso(curso);
+	        return new ResponseEntity<>(res, HttpStatus.OK);
+	    } catch (feign.FeignException.NotFound e) {
+	        // Esto captura el 404 que viene del MS Cursos
+	        return new ResponseEntity<>("inexistente", HttpStatus.NOT_FOUND);
+	    } catch (Exception e) {
+	        return new ResponseEntity<>("Error de comunicación", HttpStatus.INTERNAL_SERVER_ERROR);
+	    }
+	}
+	
+	@PutMapping(path="editarCurso")
+	public ResponseEntity<?> editarCurso(@RequestBody CursosDTO curso) {
+		if(curso.getIdCurso()==null) {
+			return new ResponseEntity<String>("ID necesario para editar",HttpStatus.BAD_REQUEST);
+		}
+		String response = escuelasService.editarCurso(curso);
+		switch (response) {
+		case "Editado":
+			return new ResponseEntity<CursosDTO>(curso,HttpStatus.OK);
+		case "escuela no existe":
+			return new ResponseEntity<String>("ID escuela no está registrada",HttpStatus.BAD_REQUEST);
+		case "curso no existe":
+			return new ResponseEntity<String>("ID Curso no existe",HttpStatus.NOT_FOUND);
+		case "Error":
+			return new ResponseEntity<String>("Error de conexión con el servicio Cursos",HttpStatus.SERVICE_UNAVAILABLE);
+		default:
+			return new ResponseEntity<String>("Error inesperado",HttpStatus.INTERNAL_SERVER_ERROR);		}
+	}
+	
+	
+	// MS Estudiantes
+	@GetMapping("listarEstudiantes")
+	public List<EstudiantesDTO> listarEstudiantes(){
+		return escuelasService.listarEstudiantes();
+	}
+	
+	@PostMapping(path="agregarEstudiante")
+	public ResponseEntity<?> agregarEstudiantes(@RequestBody EstudiantesDTO estudiante) {
+	    // 1. Llamamos al servicio y recibimos el String ("agregado", "id_repetido", etc.)
+	    String response = escuelasService.agregarEstudiante(estudiante);
+	    
+	    // 2. Evaluamos la respuesta para asignar el Status HTTP correcto
+	    switch (response) {
+	        case "agregado":
+	            // 201 Created - Mandamos el objeto para que Angular navegue
+	            return new ResponseEntity<>(estudiante, HttpStatus.CREATED);
+
+	        case "id":
+	            // 400 Bad Request - Mandamos un objeto JSON con el error
+	            return new ResponseEntity<>(Map.of("error", "El ID de estudiante ya existe"), HttpStatus.BAD_REQUEST);
+
+	        case "Escuela inexistente":
+	            // 404 Not Found
+	            return new ResponseEntity<>(Map.of("error", "La escuela seleccionada no existe"), HttpStatus.NOT_FOUND);
+	        case "nombre":
+	            // Error 406: El nombre completo ya existe (regla de negocio)
+	            return new ResponseEntity<>(Map.of("error", "El nombre del estudiante ya está registrado"), HttpStatus.NOT_ACCEPTABLE);
+	        default:
+	            // 500 Internal Server Error - Para errores técnicos no controlados
+	            return new ResponseEntity<>(Map.of("error", response), HttpStatus.INTERNAL_SERVER_ERROR);
+	    }
+	}
+	
+	
+	@PostMapping(path="eliminarEstudiante")
+	public ResponseEntity<?> eliminarEstudiante(@RequestBody EstudiantesDTO estudiante) {
+		if(estudiante.getIdEstudiante()==null) {
+			return new ResponseEntity<String>("ID estudiante es requerido",HttpStatus.BAD_REQUEST);
+		}
+		
+		String response = escuelasService.eliminarEstudiante(estudiante);
+		if(response.equals("eliminado")) {
+			return new ResponseEntity<String>("Estudiante eliminado correctamente",HttpStatus.CREATED);
+		}else if (response.equals("inexistente")) {
+			return new ResponseEntity<String>("No existe ID de estudiante",HttpStatus.NOT_FOUND);
+		}else
+			return new ResponseEntity<String>("Erro al conectar microservicio Estudiantes",HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	
+	@PutMapping(path="editarEstudiante")
+	public ResponseEntity<?> editarEstudiante(@RequestBody EstudiantesDTO estudiante) {
+	    String response = escuelasService.editarEstudiante(estudiante);
+	    switch(response) {
+	    case "editado":
+	    	return new ResponseEntity<EstudiantesDTO>(estudiante,HttpStatus.OK);
+	    case "nombre duplicado":
+	    	return new ResponseEntity<String>("Nombre pertenece a otro estudiante",HttpStatus.CONFLICT);
+	    case "Escuela no existe":
+	    	return new ResponseEntity<String>("ID escuela no válido",HttpStatus.BAD_REQUEST);
+	    default:
+	    	return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+	    }
+	   }
+	
+	
+	@PostMapping(path="buscarEstudiante")
+	public ResponseEntity<?> buscarEstudiante(@RequestBody EstudiantesDTO estudiante){
+		EstudiantesDTO response = escuelasService.buscarEstudiante(estudiante);
+		if (response!=null) {
+			return new ResponseEntity<EstudiantesDTO>(response,HttpStatus.OK);
+		}else
+			return new ResponseEntity<String>("No existe ID estudiante",HttpStatus.NOT_FOUND);
+	}
+	
+	
+}

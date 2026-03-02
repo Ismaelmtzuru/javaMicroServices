@@ -1,0 +1,87 @@
+package com.mx.MsCourses.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.mx.MsCourses.model.Cursos;
+import com.mx.MsCourses.service.CursoService;
+
+@RestController
+@RequestMapping(path="cursos")
+@CrossOrigin
+public class CursosController {
+
+	@Autowired
+	CursoService cursoService;
+	
+	@GetMapping(path="listar")
+	public ResponseEntity<?> listar(){
+		List<Cursos> lista = cursoService.listar();
+		if(lista.isEmpty()) {
+		return new ResponseEntity<List<Cursos>>(lista,HttpStatus.NO_CONTENT);
+		}else {
+			return new ResponseEntity<>(lista,HttpStatus.OK);
+		}
+	}
+	
+	@PostMapping(path="guardar")
+	public ResponseEntity<?> guardar(@RequestBody Cursos curso){
+		Cursos guardado = cursoService.guardar(curso);
+		if(guardado == null) {
+		return new ResponseEntity<String>("Registro ya registrado", HttpStatus.CONFLICT);
+		}
+		return new ResponseEntity<>(guardado,HttpStatus.CREATED);
+	}
+	
+	@GetMapping(path="cursos/{idEscuela}")
+	public List<Cursos> buscarIdEscuela(@PathVariable("idEscuela") Integer idEscuela){
+		return cursoService.buscarIdEscuela(idEscuela);
+	}
+	
+	@PostMapping(path="buscarCurso")
+	public ResponseEntity<?> buscarCurso(@RequestBody Cursos curso){
+		Cursos encontrado = cursoService.buscarCurso(curso.getIdCurso());
+		if (encontrado!=null) {
+			return new ResponseEntity<Cursos>(curso,HttpStatus.OK);
+		}else {
+			return new ResponseEntity<String>("No existe curso",HttpStatus.NOT_FOUND);
+		}
+	}
+
+	// En el Microservicio de CURSOS (Puerto 8762)
+	@PostMapping(path="eliminarCurso")
+	public ResponseEntity<String> eliminarCurso(@RequestBody Cursos curso) {
+	    String response = cursoService.eliminar(curso);
+	    
+	    if(response.equals("eliminado")) {
+	        return new ResponseEntity<>("Registro eliminado correctamente", HttpStatus.OK);
+	    }
+	    
+	    return new ResponseEntity<>("El registro no existe", HttpStatus.NOT_FOUND);
+	}
+	
+	@PutMapping(path="editarCurso")
+	public ResponseEntity<?> editarCurso(@RequestBody Cursos curso){
+		String response = cursoService.editar(curso);
+		if(response.equals("editado")) {
+			return new ResponseEntity<Cursos>(curso,HttpStatus.CREATED);
+		}
+		return new ResponseEntity<String>("No existe registro para modificar",HttpStatus.NOT_FOUND);
+	}
+	
+	
+	
+	
+	
+}

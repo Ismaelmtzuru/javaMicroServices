@@ -1,0 +1,129 @@
+version: '3.8'
+
+services:
+  oracle-db:
+    image: gvenzl/oracle-xe:21-slim
+    container_name: oracle-db
+    environment:
+      - ORACLE_PASSWORD=admin
+      - APP_USER=escuela
+      - APP_USER_PASSWORD=escuela
+    ports:
+      - "1521:1521"
+    volumes:
+      - ./DatabaseCreation/init.sql:/container-entrypoint-initdb.d/init.sql
+    networks:
+      - ms-network
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  eureka-server:
+    build:
+      context: ./EurekaServer
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - ms-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8761/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  ms-escuelas:
+    build:
+      context: ./MsEscuelas
+    container_name: ms-escuelas
+    ports:
+      - "8764:8764"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:oracle:thin:@oracle-db:1521/XE
+      - SPRING_DATASOURCE_USERNAME=escuela
+      - SPRING_DATASOURCE_PASSWORD=escuela
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SERVER_PORT=8764
+    depends_on:
+      oracle-db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - ms-network
+
+  ms-estudiantes:
+    build:
+      context: ./Estudiantes
+    container_name: ms-estudiantes
+    ports:
+      - "8763:8763"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:oracle:thin:@oracle-db:1521/XE
+      - SPRING_DATASOURCE_USERNAME=escuela
+      - SPRING_DATASOURCE_PASSWORD=escuela
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SERVER_PORT=8763
+    depends_on:
+      oracle-db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - ms-network
+
+  ms-courses:
+    build:
+      context: ./MsCourses
+    container_name: ms-courses
+    ports:
+      - "8762:8762"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SERVER_PORT=8762
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - ms-network
+
+  api-gateway:
+    build:
+      context: ./ApiGateway
+    container_name: api-gateway
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_CLOUD_GATEWAY_ROUTES_0_URI=http://ms-escuelas:8764
+      - SPRING_CLOUD_GATEWAY_ROUTES_1_URI=http://ms-estudiantes:8763
+      - SPRING_CLOUD_GATEWAY_ROUTES_2_URI=http://ms-courses:8762
+    ports:
+      - "9000:9000"
+    depends_on:
+      ms-escuelas:
+        condition: service_started
+      ms-estudiantes:
+        condition: service_started
+    networks:
+      - ms-network
+
+  frontend-angular:
+    build:
+      context: ./ApiGatewayFront
+    container_name: frontend-angular
+    ports:
+      - "4200:80"
+    depends_on:
+      api-gateway:
+        condition: service_started
+    networks:
+      - ms-network
+
+networks:
+  ms-network:
+    driver: bridge

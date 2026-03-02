@@ -1,0 +1,80 @@
+package com.mx.Estudiantes.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.mx.Estudiantes.model.Estudiantes;
+import com.mx.Estudiantes.service.EstudiantesService;
+
+@RestController
+@RequestMapping(path="estudiantes")
+public class EstudiantesController {
+
+	@Autowired
+	EstudiantesService estudiantesService;
+	
+	
+	@GetMapping
+	public ResponseEntity<List<Estudiantes>> listar(){
+		List<Estudiantes> respuesta = estudiantesService.listar();
+		return new ResponseEntity<List<Estudiantes>>(respuesta,HttpStatus.CREATED);
+	}
+	
+	@GetMapping(path="buscar/{idEscuela}")
+	public ResponseEntity<List<Estudiantes>> listarIdEscuela(@PathVariable("idEscuela") Integer idEscuela){
+		List<Estudiantes> respuesta = estudiantesService.buscarEstudianteEscuela(idEscuela);
+		return new ResponseEntity<List<Estudiantes>>(respuesta,HttpStatus.CREATED);
+	}
+	
+	@PostMapping
+	public ResponseEntity<?> guardar(@RequestBody Estudiantes estudiante) {
+	    // Al llamar al service, si el ID existe, saltará la ResponseStatusException automáticamente
+	    // Si no existe, se guardará y nos devolverá el objeto guardado
+	    Estudiantes guardado = estudiantesService.guardar(estudiante);
+	    return new ResponseEntity<>(guardado, HttpStatus.CREATED);
+	}
+	
+	@PostMapping(path="eliminarEstudiante")
+	public ResponseEntity<?> elimiinarEstudiante(@RequestBody Estudiantes estudiante){
+		String response =  estudiantesService.eliminar(estudiante);
+		if(response.equals("eliminado")) {
+			return new ResponseEntity<Estudiantes>(estudiante,HttpStatus.CREATED);
+		}
+		return new ResponseEntity<String>("No existe ID de estudiante",HttpStatus.NOT_FOUND);
+	}
+
+	@PutMapping(path="editarEstudiante")
+	public ResponseEntity<?> editarEstudiante(@RequestBody Estudiantes estudiante){
+		String response = estudiantesService.editar(estudiante);
+		System.out.println(estudiante.getIdEstudiante());
+		if(response.equals("editado")) {
+			return new ResponseEntity<Estudiantes>(estudiante,HttpStatus.OK);
+		}else if(response.equals("nombre dupclicado")) {
+			return new ResponseEntity<String>("Nombre duplicado",HttpStatus.CONFLICT);
+		}
+		return new ResponseEntity<String>("No existe para editar",HttpStatus.NOT_FOUND);
+	}
+	
+	@PostMapping(path="buscarEstudiante")
+	public ResponseEntity<?> buscarEstudiante(@RequestBody Estudiantes estudiante){
+		Estudiantes response = estudiantesService.buscar(estudiante);
+		if(response==null) {
+			return new ResponseEntity<String>("No existe alumno",HttpStatus.NOT_FOUND);
+		}else
+			return new ResponseEntity<Estudiantes>(response,HttpStatus.OK);
+	}
+	
+	
+	
+	
+}

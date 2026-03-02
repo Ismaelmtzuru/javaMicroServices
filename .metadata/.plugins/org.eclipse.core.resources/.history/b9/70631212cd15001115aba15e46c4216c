@@ -1,0 +1,29 @@
+package com.mx.MsEscuelas.openFeing;
+
+import java.util.List;
+
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
+import com.mx.MsEscuelas.dto.EstudiantesDTO;
+
+@FeignClient(name="MS-ESTUDIANTES", url="http://localhost:8763", path="/estudiantes")
+public interface FeingClienteMsEstudiantes {
+	@GetMapping
+	public List<EstudiantesDTO> listar();
+	
+	@PostMapping
+	public EstudiantesDTO guardarEstudiante(@RequestBody EstudiantesDTO estudiante);
+	
+	@PostMapping(path="eliminarEstudiante")
+	public EstudiantesDTO eliminarEstudiante(@RequestBody EstudiantesDTO estudiante);
+	
+	@PutMapping(path="editarEstudiante")
+	public EstudiantesDTO editarEstudiante(@RequestBody EstudiantesDTO estudiante);
+	
+	@PostMapping(path="buscarEstudiante")
+	public EstudiantesDTO buscarEstudiante(@RequestBody EstudiantesDTO estudiante);
+}

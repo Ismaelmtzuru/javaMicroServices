@@ -1,0 +1,36 @@
+package com.mx.MsEscuelas.openFeing;
+
+import java.util.List;
+
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
+import com.mx.MsEscuelas.dto.CursosDTO;
+
+//@FeignCliente -- sirve para la comunicación de los MicroServicios
+// Recibe parámetors: nombreMicroServicio, UrlServidorLocalMs, pathWebservice
+
+@FeignClient(name="MS-COURSES", url="http://localhost:8762", path="/cursos")
+public interface FeingClientMsCourses {
+
+	@PostMapping(path="guardar")
+	public CursosDTO guardar(@RequestBody CursosDTO curso);
+	
+	@GetMapping(path="listar")
+	public List<CursosDTO> listar();
+	
+	@GetMapping(path="{idEscuela}")
+	public List<CursosDTO> buscarIdEscuela(@PathVariable("idEscuela") Integer idEscuela);
+	
+	@PostMapping(path="eliminarCurso")
+	public String eliminarCurso(@RequestBody CursosDTO curso);
+	
+	@PostMapping(path="editarCurso")
+	public CursosDTO editarCurso(@RequestBody CursosDTO curso);
+	
+	@PostMapping(path="buscarCurso")
+	public CursosDTO buscarCurso(@RequestBody CursosDTO curso);
+}

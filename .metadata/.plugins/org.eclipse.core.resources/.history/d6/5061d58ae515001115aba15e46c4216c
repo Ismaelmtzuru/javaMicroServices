@@ -1,0 +1,90 @@
+package com.mx.Estudiantes.service;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
+import com.mx.Estudiantes.model.Estudiantes;
+import com.mx.Estudiantes.repository.EstudiantesRepository;
+
+@Service
+public class EstudiantesService {
+	@Autowired
+	EstudiantesRepository estudiantesRepository;
+	
+	@Transactional(readOnly=true)
+	public List<Estudiantes> listar(){
+		return estudiantesRepository.findAll();
+	}
+	
+	
+	@Transactional(readOnly=true)
+	public List<Estudiantes> buscarEstudianteEscuela(Integer idEscuela){
+		return estudiantesRepository.findByIdEscuela(idEscuela);
+	}
+	
+
+	@Transactional
+	public Estudiantes guardar(Estudiantes estudiante) {
+	    // 1. Validar ID
+	    if(estudiantesRepository.existsById(estudiante.getIdEstudiante())) {
+	        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "id");
+	    }
+	    
+	    // 2. Validar Nombre Completo (Tu lógica original)
+	    String nombreNuevo = (estudiante.getNombre() + estudiante.getApp() + estudiante.getApm())
+	                         .toLowerCase().replace(" ", "");
+	                         
+	    if(estudiantesRepository.findByNombreCompleto(nombreNuevo).isPresent()) {
+	        // Usamos un status diferente para el nombre (406 es "Not Acceptable")
+	        throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "nombre");
+	    }
+	    
+	    // 3. Si todo está bien, guardar
+	    return estudiantesRepository.save(estudiante);
+	}
+	
+	@Transactional
+	public String eliminar(Estudiantes estudiante) {
+		Estudiantes encontrado = estudiantesRepository.findById(estudiante.getIdEstudiante()).orElse(null);
+		if(encontrado != null) {
+			estudiantesRepository.delete(estudiante);
+			return "eliminado";
+		}else
+		return "inexistente";
+	}
+	
+	@Transactional
+	public String editar(Estudiantes estudiante) {
+
+		Estudiantes encontrado = estudiantesRepository.findById(estudiante.getIdEstudiante()).orElse(null);
+		if(encontrado!=null) {
+			String nombreValorar = (estudiante.getNombre()+estudiante.getApp()+estudiante.getApm()).replace(" ","");
+			Optional<Estudiantes> duplicado = estudiantesRepository.findByNombreCompletoYDistintoId(nombreValorar, estudiante.getIdEstudiante());
+			System.out.println(encontrado);
+			if(duplicado.isPresent()) {
+				return "nombre duplicado";
+			}
+			
+			estudiantesRepository.save(estudiante);
+			return "editado";
+		}else {
+			return "inexistente";
+		}
+	}
+	
+	@Transactional(readOnly=true)
+	public Estudiantes buscar(Estudiantes estudiante) {
+		return estudiantesRepository.findById(estudiante.getIdEstudiante()).orElse(null);
+		
+	}
+	
+	
+	
+	
+ }
